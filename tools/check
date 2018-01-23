@@ -1,0 +1,17 @@
+#!/bin/sh -eu
+#
+# Ugly reference implementation of Hacklab membership check based on
+# email address
+
+if test $# -ne 3; then
+    echo Usage: $0 hashfile hmac email >&2
+    exit 1
+fi
+
+normalized=`echo "$3" | sed -sr 's/^\s?(.*)\s?*/\1/' | tr [:upper:] [:lower:] | sed -s 's/+[^@]*@/@/'`
+hmac=`echo -n "$normalized" | openssl dgst -sha256 -hmac "$2" -binary | hexdump -e '32/1 "%02x" "\n"'`
+hexdump -e '32/1 "%02x" "\n"' <"$1" | if grep -q ^$hmac$; then
+    echo "Special price just for you!"
+else
+    echo "Ordinary customer"
+fi

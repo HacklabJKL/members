@@ -1,0 +1,23 @@
+#!/bin/sh -eu
+#
+# Generates member email crypto hash map from Hacklab membership data
+# git repository. The resulting blob contains raw SHA-256 HMAC
+# entries, each 32 bytes.
+#
+# Designed to be run from a git post-receive hook
+
+if test $# -ne 1; then
+    echo Usage: $0 hmac >&2
+    exit 1
+fi
+
+git grep -h ^email master:current |     # Find entries starting with "email"
+    sed -nr 's/^email\s(.*)\s?*/\1/p' | # Remove all but email address
+    tr [:upper:] [:lower:] |            # To lowercase
+    sed 's/+[^@]*@/@/' |                # Remove + aliases
+    while read -r email; do             # Iterate lines and calculate HMAC
+	echo -n "$email" | openssl dgst -sha256 -hmac "$1" -binary
+    done |
+    hexdump -e '32/1 "%02x" "\n"' |     # Decode binary to hexadecimal hashes
+    sort |                              # Sort them for added anonymity
+    xxd -p -r                           # Dump raw binary
