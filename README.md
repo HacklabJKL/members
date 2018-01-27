@@ -3,12 +3,12 @@
 Every time our private membership repository changes, we generate HMAC
 using SHA-256 hash function from all of our members' email addresses.
 
-It is uUseful for giving discounts to some services without
+It is useful for giving discounts to some services without
 revealing the membership registry open to the Internet. Only the
 number of members is shown. When you know the HMAC, it is possible to
 check a membership but not decode full contents of the registry.
 
-Every service has its own hash map
+Every service has its own hash map.
 
 ## File format
 
